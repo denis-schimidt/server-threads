@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 class ComandoExecutavelDesconhecido implements Runnable {
 	private PrintWriter saida;
 
-	@Selecionavel
 	ComandoExecutavelDesconhecido(PrintWriter saida) {
 		this.saida = saida;
 	}

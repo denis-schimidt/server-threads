@@ -4,25 +4,25 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 public enum Comando {
 	C1(ComandoExecutavelC1.class),
 	C2(ComandoExecutavelC2.class),
+	C3(ComandoExecutavelC3.class),
 	DESCONECTAR(ComandoExecutavelDesconectar.class, "<EOF>"),
 	DESCONHECIDO(ComandoExecutavelDesconhecido.class);
 
-	private String comandoAsString;
-	private Constructor<? extends Runnable> construtorExecutavel;
+	private final String apelidoDoComando;
+	private final Constructor<? extends Runnable> construtorComandoExecutavel;
 
 	Comando(Class<? extends Runnable> classeComandoExecutavel) {
-		setarConstrutorComandoExecutavel(classeComandoExecutavel);
-		this.comandoAsString = name();
+		this(classeComandoExecutavel, null);
 	}
 
-	Comando(Class<? extends Runnable> classeComandoExecutavel, String comandoAsString) {
-		setarConstrutorComandoExecutavel(classeComandoExecutavel);
-		this.comandoAsString = comandoAsString;
+	Comando(Class<? extends Runnable> classeComandoExecutavel, String apelidoDoComando) {
+		this.construtorComandoExecutavel = ComandoExecutavelFactory.getConstrutorDe(classeComandoExecutavel);
+		this.apelidoDoComando = apelidoDoComando;
 	}
 
 	public static boolean isDesconectado(String mensagem) {
@@ -30,31 +30,16 @@ public enum Comando {
 	}
 
 	public static Comando of(String comandoAsString) {
-		String comandoMaiusculoESemEspacos = comandoAsString.trim().toUpperCase();
+		String nomeComandoOuApelido = comandoAsString.trim().toUpperCase();
 
 		return Stream.of(values())
-				.filter(comando -> comando.comandoAsString.equals(comandoMaiusculoESemEspacos))
+				.filter(comando -> comando.name().equals(nomeComandoOuApelido) ||
+							ofNullable(comando.apelidoDoComando).map(apelidoComando -> apelidoComando.equals(nomeComandoOuApelido)).orElse(false))
 				.findFirst()
 				.orElse(DESCONHECIDO);
 	}
 
-	private void setarConstrutorComandoExecutavel(Class<? extends Runnable> comandoExecutavel) {
-		construtorExecutavel = asList(comandoExecutavel.getDeclaredConstructors())
-				.stream()
-				.filter(constructor -> constructor.isAnnotationPresent(Selecionavel.class))
-				.map(constructor -> (Constructor<? extends Runnable>) constructor)
-				.findFirst()
-				.orElseThrow(() -> new IllegalCallerException("Comando " + comandoExecutavel + " não possui um construtor selecionável"));
-	}
-
 	public Runnable getComandoExecutavel(PrintWriter writer, ServidorExecutor servidorExecutor) {
-
-		try {
-			return construtorExecutavel.getParameterCount() == 1 ? construtorExecutavel.newInstance(writer) :
-					construtorExecutavel.newInstance(writer, servidorExecutor);
-
-		} catch (Exception e) {
-			throw new IllegalCallerException(e);
-		}
+		return ComandoExecutavelFactory.getComandoExecutavel(construtorComandoExecutavel, writer, servidorExecutor);
 	}
 }

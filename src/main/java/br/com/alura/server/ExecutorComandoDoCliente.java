@@ -25,7 +25,9 @@ class ExecutorComandoDoCliente implements Runnable {
 
 			while (entrada.hasNextLine()) {
 				Comando comandoCliente = Comando.of(entrada.nextLine());
-				executorService.execute(comandoCliente.getComandoExecutavel(saida, servidorExecutor));
+				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorExecutor);
+
+				executorService.execute(comandoExecutavel);
 			}
 
 		} catch (RejectedExecutionException e) {
