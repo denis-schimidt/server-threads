@@ -2,6 +2,7 @@ package br.com.alura.server;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -39,7 +40,7 @@ public enum Comando {
 				.orElse(DESCONHECIDO);
 	}
 
-	public Runnable getComandoExecutavel(PrintWriter writer, ServidorExecutor servidorExecutor) {
-		return ComandoExecutavelFactory.getComandoExecutavel(construtorComandoExecutavel, writer, servidorExecutor);
+	public Runnable getComandoExecutavel(PrintWriter writer, ServidorController servidorController, ExecutorService executorService) {
+		return ComandoExecutavelFactory.getComandoExecutavel(construtorComandoExecutavel, writer, servidorController, executorService);
 	}
 }

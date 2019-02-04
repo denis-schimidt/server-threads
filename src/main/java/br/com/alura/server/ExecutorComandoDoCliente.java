@@ -10,12 +10,12 @@ import java.util.concurrent.RejectedExecutionException;
 class ExecutorComandoDoCliente implements Runnable {
 	private final ExecutorService executorService;
 	private final Socket socket;
-	private final ServidorExecutor servidorExecutor;
+	private final ServidorController servidorController;
 
-	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorExecutor servidorExecutor) {
+	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController) {
 		this.executorService = executorService;
 		this.socket = socket;
-		this.servidorExecutor = servidorExecutor;
+		this.servidorController = servidorController;
 	}
 
 	@Override
@@ -25,7 +25,7 @@ class ExecutorComandoDoCliente implements Runnable {
 
 			while (entrada.hasNextLine()) {
 				Comando comandoCliente = Comando.of(entrada.nextLine());
-				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorExecutor);
+				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService);
 
 				executorService.execute(comandoExecutavel);
 			}

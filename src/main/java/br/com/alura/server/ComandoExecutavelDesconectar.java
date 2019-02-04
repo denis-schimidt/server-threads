@@ -6,11 +6,11 @@ import static br.com.alura.server.Comando.DESCONECTAR;
 
 class ComandoExecutavelDesconectar implements Runnable {
 	private final PrintWriter saida;
-	private final ServidorExecutor servidorExecutor;
+	private final ServidorController servidorController;
 
-	ComandoExecutavelDesconectar(PrintWriter saida, ServidorExecutor servidorExecutor) {
+	ComandoExecutavelDesconectar(PrintWriter saida, ServidorController servidorController) {
 		this.saida = saida;
-		this.servidorExecutor = servidorExecutor;
+		this.servidorController = servidorController;
 	}
 
 	@Override
@@ -19,7 +19,7 @@ class ComandoExecutavelDesconectar implements Runnable {
 		try {
 			saida.println(DESCONECTAR);
 			saida.flush();
-			servidorExecutor.encerrar();
+			servidorController.encerrar();
 
 		} catch (Exception e) {
 			e.printStackTrace();

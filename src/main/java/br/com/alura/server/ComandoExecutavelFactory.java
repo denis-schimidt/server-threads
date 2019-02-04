@@ -27,7 +27,7 @@ class ComandoExecutavelFactory {
 				.map(tipoParametroConstrutor -> {
 
 					for (Object parametroParaInstanciarComando : parametrosParaInstanciarComando) {
-						if (parametroParaInstanciarComando.getClass().equals(tipoParametroConstrutor)) {
+						if (tipoParametroConstrutor.isAssignableFrom(parametroParaInstanciarComando.getClass())) {
 							return parametroParaInstanciarComando;
 						}
 					}

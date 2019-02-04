@@ -9,14 +9,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-class ServidorExecutor {
+class ServidorController {
 	private final ServerSocket serverSocket;
 	private final ExecutorService executorService;
 	private final AtomicBoolean servidorRodando;
 
-	ServidorExecutor() throws IOException {
+	ServidorController() throws IOException {
 		serverSocket = new ServerSocket(12345);
-		executorService = Executors.newCachedThreadPool();
+		executorService = Executors.newCachedThreadPool(new ThreadFactoryServer(Executors.privilegedThreadFactory()));
 		servidorRodando = new AtomicBoolean(true);
 	}
 
@@ -45,7 +45,7 @@ class ServidorExecutor {
 		servidorRodando.set(false);
 
 		if (!serverSocket.isClosed()) {
-			executorService.awaitTermination(20, TimeUnit.SECONDS);
+			executorService.awaitTermination(10, TimeUnit.SECONDS);
 			executorService.shutdown();
 			serverSocket.close();
 			System.out.println("Desligando servidor...");
