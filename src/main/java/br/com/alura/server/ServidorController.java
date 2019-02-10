@@ -4,20 +4,21 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 class ServidorController {
+	private static final int CAPACIDADE_DA_FILA_DE_COMANDOS = 3;
 	private final ServerSocket serverSocket;
 	private final ExecutorService executorService;
 	private final AtomicBoolean servidorRodando;
+	private BlockingQueue<Comando> filaComandos;
 
 	ServidorController() throws IOException {
 		serverSocket = new ServerSocket(12345);
-		executorService = Executors.newCachedThreadPool(new ThreadFactoryServer(Executors.privilegedThreadFactory()));
+		executorService = Executors.newCachedThreadPool(new ThreadFactoryServer(Executors.defaultThreadFactory()));
 		servidorRodando = new AtomicBoolean(true);
+		filaComandos = new ArrayBlockingQueue<>(CAPACIDADE_DA_FILA_DE_COMANDOS);
 	}
 
 	void rodar() throws IOException {
@@ -31,14 +32,13 @@ class ServidorController {
 
 				if (socket.isConnected()) {
 					System.out.printf("Cliente %s:%s conectado ao servidor\n", socket.getLocalAddress(), socket.getPort());
-					executorService.execute(new ExecutorComandoDoCliente(executorService, socket, this));
+					executorService.execute(new ExecutorComandoDoCliente(executorService, socket, this, filaComandos));
 				}
 
 			} catch (SocketException e) {
 				System.out.println("Servidor rodando -> " + servidorRodando);
 			}
 		}
-
 	}
 
 	void encerrar() throws Exception {

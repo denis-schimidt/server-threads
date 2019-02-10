@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -11,11 +12,13 @@ class ExecutorComandoDoCliente implements Runnable {
 	private final ExecutorService executorService;
 	private final Socket socket;
 	private final ServidorController servidorController;
+	private final BlockingQueue<Comando> filaComandos;
 
-	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController) {
+	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController, BlockingQueue<Comando> filaComandos) {
 		this.executorService = executorService;
 		this.socket = socket;
 		this.servidorController = servidorController;
+		this.filaComandos = filaComandos;
 	}
 
 	@Override
@@ -25,7 +28,7 @@ class ExecutorComandoDoCliente implements Runnable {
 
 			while (entrada.hasNextLine()) {
 				Comando comandoCliente = Comando.of(entrada.nextLine());
-				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService);
+				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService, filaComandos);
 
 				executorService.execute(comandoExecutavel);
 			}
