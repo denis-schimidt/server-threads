@@ -21,7 +21,7 @@ class ClienteController {
 			if (socket.isConnected()) {
 				System.out.println("Cliente conectado ao servidor");
 
-				executorService.invokeAll(asList(new LeitorDeMensagem(socket), new EscritorDeMensagem(socket)),2L , TimeUnit.MINUTES);
+				executorService.invokeAll(asList(new LeitorDeMensagem(socket), new EscritorDeMensagem(socket)),10L , TimeUnit.MINUTES);
 			}
 
 		} catch (Exception e) {

@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -42,7 +41,7 @@ public enum Comando {
 				.orElse(DESCONHECIDO);
 	}
 
-	public Runnable getComandoExecutavel(PrintWriter writer, ServidorController servidorController, ExecutorService executorService, BlockingQueue<Comando> filaComandos, AtomicBoolean servidorRodando) {
-		return ComandoExecutavelFactory.getComandoExecutavel(construtorComandoExecutavel, writer, servidorController, executorService, filaComandos, servidorRodando);
+	public Runnable getComandoExecutavel(PrintWriter writer, ServidorController servidorController, ExecutorService executorService, BlockingQueue<ComandoComRespostaAoClienteDto> filaComandos) {
+		return ComandoExecutavelFactory.getComandoExecutavel(construtorComandoExecutavel, writer, servidorController, executorService, filaComandos);
 	}
 }

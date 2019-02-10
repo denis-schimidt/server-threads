@@ -7,21 +7,18 @@ import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class ExecutorComandoDoCliente implements Runnable {
 	private final ExecutorService executorService;
 	private final Socket socket;
 	private final ServidorController servidorController;
-	private final BlockingQueue<Comando> filaComandos;
-	private volatile AtomicBoolean servidorRodando;
+	private final BlockingQueue<ComandoComRespostaAoClienteDto> filaComandos;
 
-	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController, BlockingQueue<Comando> filaComandos, AtomicBoolean servidorRodando) {
+	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController, BlockingQueue<ComandoComRespostaAoClienteDto> filaComandos) {
 		this.executorService = executorService;
 		this.socket = socket;
 		this.servidorController = servidorController;
 		this.filaComandos = filaComandos;
-		this.servidorRodando = servidorRodando;
 	}
 
 	@Override
@@ -31,13 +28,13 @@ class ExecutorComandoDoCliente implements Runnable {
 
 			while (entrada.hasNextLine()) {
 				Comando comandoCliente = Comando.of(entrada.nextLine());
-				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService, filaComandos, servidorRodando);
+				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService, filaComandos);
 
 				executorService.execute(comandoExecutavel);
 			}
 
 		} catch (RejectedExecutionException e) {
-			System.out.println("Nova requisição rejeitada. Servidor encerrado!");
+			System.out.println("Servidor bloqueado para novas requisições!");
 
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,35 +1,26 @@
 package br.com.alura.server;
 
-import java.io.PrintWriter;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.String.format;
 
 class ConsumidorComando implements Runnable {
-	private final PrintWriter escritorMensagemParaCliente;
-	private final BlockingQueue<Comando> filaComandos;
-	private final Comando comando;
-	private final AtomicBoolean servidorRodando;
+	private final BlockingQueue<ComandoComRespostaAoClienteDto> filaComandos;
 
-	public ConsumidorComando(PrintWriter escritorMensagemParaCliente, BlockingQueue<Comando> filaComandos, Comando comando, AtomicBoolean servidorRodando) {
-		this.escritorMensagemParaCliente = escritorMensagemParaCliente;
+	public ConsumidorComando(BlockingQueue<ComandoComRespostaAoClienteDto> filaComandos) {
 		this.filaComandos = filaComandos;
-		this.comando = comando;
-		this.servidorRodando = servidorRodando;
 	}
 
 	@Override
 	public void run() {
 
 		try {
+			ComandoComRespostaAoClienteDto dto;
 
-			while(servidorRodando.get()){
-				Comando comando = filaComandos.take();
-				String nomeComando = comando.name();
-				System.out.println(format("Consumindo comando %s na Thread id: %s", nomeComando, Thread.currentThread().getId()));
+			while ((dto = filaComandos.take()) != null) {
+				System.out.println(format("Consumindo comando %s na Thread id: %s", dto.getNomeComando(), Thread.currentThread().getId()));
 				Thread.sleep(20_000);
-				enviarMensagemSucessoNoServidorECliente(nomeComando);
+				enviarMensagemSucessoNoServidorECliente(dto);
 			}
 
 		} catch (InterruptedException e) {
@@ -37,10 +28,9 @@ class ConsumidorComando implements Runnable {
 		}
 	}
 
-	private void enviarMensagemSucessoNoServidorECliente(String nomeComando) {
-		String mensagemSucesso = format("Comando %s executado com sucesso na Thread id: %s", nomeComando, Thread.currentThread().getId());
-		escritorMensagemParaCliente.println(mensagemSucesso);
-		escritorMensagemParaCliente.flush();
+	private void enviarMensagemSucessoNoServidorECliente(ComandoComRespostaAoClienteDto dto) {
+		String mensagemSucesso = format("Comando %s executado com sucesso na Thread id: %s", dto.getNomeComando(), Thread.currentThread().getId());
+		dto.enviarRespostaAoCliente(mensagemSucesso);
 
 		System.out.println(mensagemSucesso);
 	}
