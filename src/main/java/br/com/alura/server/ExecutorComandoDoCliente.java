@@ -7,18 +7,21 @@ import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class ExecutorComandoDoCliente implements Runnable {
 	private final ExecutorService executorService;
 	private final Socket socket;
 	private final ServidorController servidorController;
 	private final BlockingQueue<Comando> filaComandos;
+	private volatile AtomicBoolean servidorRodando;
 
-	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController, BlockingQueue<Comando> filaComandos) {
+	ExecutorComandoDoCliente(ExecutorService executorService, Socket socket, ServidorController servidorController, BlockingQueue<Comando> filaComandos, AtomicBoolean servidorRodando) {
 		this.executorService = executorService;
 		this.socket = socket;
 		this.servidorController = servidorController;
 		this.filaComandos = filaComandos;
+		this.servidorRodando = servidorRodando;
 	}
 
 	@Override
@@ -28,7 +31,7 @@ class ExecutorComandoDoCliente implements Runnable {
 
 			while (entrada.hasNextLine()) {
 				Comando comandoCliente = Comando.of(entrada.nextLine());
-				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService, filaComandos);
+				Runnable comandoExecutavel = comandoCliente.getComandoExecutavel(saida, servidorController, executorService, filaComandos, servidorRodando);
 
 				executorService.execute(comandoExecutavel);
 			}

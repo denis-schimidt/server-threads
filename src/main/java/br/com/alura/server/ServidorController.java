@@ -32,7 +32,7 @@ class ServidorController {
 
 				if (socket.isConnected()) {
 					System.out.printf("Cliente %s:%s conectado ao servidor\n", socket.getLocalAddress(), socket.getPort());
-					executorService.execute(new ExecutorComandoDoCliente(executorService, socket, this, filaComandos));
+					executorService.execute(new ExecutorComandoDoCliente(executorService, socket, this, filaComandos, servidorRodando));
 				}
 
 			} catch (SocketException e) {
@@ -45,10 +45,12 @@ class ServidorController {
 		servidorRodando.set(false);
 
 		if (!serverSocket.isClosed()) {
-			executorService.awaitTermination(10, TimeUnit.SECONDS);
+			System.out.println("Tentando encerrar todas as threads...");
 			executorService.shutdown();
+			executorService.awaitTermination(60, TimeUnit.SECONDS);
 			serverSocket.close();
-			System.out.println("Desligando servidor...");
+			executorService.shutdownNow();
+			System.out.println("Encerrando servidor...");
 		}
 	}
 }
